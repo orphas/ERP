@@ -3,17 +3,20 @@
   "version": "1.0.0",
   "description": "Enterprise Resource Planning System - Next.js Edition",
   "private": true,
+  "prisma": {
+    "schema": "./prisma/schema.prisma"
+  },
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "prisma generate && next build",
+    "build": "node scripts/prisma-generate.cjs && next build",
     "start": "next start",
-    "postinstall": "prisma generate",
+    "postinstall": "node scripts/prisma-generate.cjs",
     "lint": "next lint",
     "test:e2e": "playwright test",
     "test:e2e:role": "playwright test tests/e2e/role-matrix.spec.ts",
-    "db:push": "prisma db push",
+    "db:push": "node scripts/prisma-db-push.cjs",
     "db:studio": "prisma studio",
-    "db:generate": "prisma generate",
+    "db:generate": "node scripts/prisma-generate.cjs",
     "db:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {

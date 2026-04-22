@@ -18,6 +18,7 @@ Required deploy sequence
 - Use Node.js 20 in cPanel.
 - Run install and build from the project root, the same directory that contains `package.json`, `server.js`, `app/`, and `prisma/`.
 - Do not skip lifecycle scripts during install. Prisma client generation is required both after install and during build.
+- Prisma lifecycle scripts are wrapped to resolve the schema from the project root even if cPanel runs npm hooks from the wrong directory.
 - Confirm that `prisma/dev.db` exists after upload and is writable by the Node.js app user.
 
 Notes
