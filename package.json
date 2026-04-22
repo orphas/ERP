@@ -8,15 +8,15 @@
   },
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "node scripts/prisma-generate.cjs && next build",
+    "build": "node -e \"var r=process.env.npm_config_local_prefix||process.cwd(),s=require('child_process').spawnSync,p=require('path').join;var res=s(process.execPath,[p(r,'scripts','prisma-generate.cjs')],{cwd:r,stdio:'inherit',env:process.env});process.exit(res.status||0)\" && next build",
     "start": "next start",
-    "postinstall": "node scripts/prisma-generate.cjs",
+    "postinstall": "node -e \"var r=process.env.npm_config_local_prefix||process.cwd(),s=require('child_process').spawnSync,p=require('path').join;var res=s(process.execPath,[p(r,'scripts','prisma-generate.cjs')],{cwd:r,stdio:'inherit',env:process.env});process.exit(res.status||0)\"",
     "lint": "next lint",
     "test:e2e": "playwright test",
     "test:e2e:role": "playwright test tests/e2e/role-matrix.spec.ts",
-    "db:push": "node scripts/prisma-db-push.cjs",
+    "db:push": "node -e \"var r=process.env.npm_config_local_prefix||process.cwd(),s=require('child_process').spawnSync,p=require('path').join;var res=s(process.execPath,[p(r,'scripts','prisma-db-push.cjs')],{cwd:r,stdio:'inherit',env:process.env});process.exit(res.status||0)\"",
     "db:studio": "prisma studio",
-    "db:generate": "node scripts/prisma-generate.cjs",
+    "db:generate": "node -e \"var r=process.env.npm_config_local_prefix||process.cwd(),s=require('child_process').spawnSync,p=require('path').join;var res=s(process.execPath,[p(r,'scripts','prisma-generate.cjs')],{cwd:r,stdio:'inherit',env:process.env});process.exit(res.status||0)\"",
     "db:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
