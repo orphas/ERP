@@ -8,7 +8,17 @@ process.env.RAYON_NUM_THREADS = process.env.RAYON_NUM_THREADS || "1";
 
 const next = require("next");
 
-const appBasePath = "/sgicerp";
+function normalizeBasePath(input) {
+  const trimmed = (input || "").trim();
+  if (!trimmed || trimmed === "/") {
+    return "";
+  }
+
+  const prefixed = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return prefixed.replace(/\/+$/, "");
+}
+
+const appBasePath = normalizeBasePath(process.env.APP_BASE_PATH);
 const port = Number.parseInt(process.env.PORT || process.env.APP_PORT || "3000", 10);
 const hostname = "0.0.0.0";
 const app = next({
@@ -20,6 +30,10 @@ const app = next({
 const handle = app.getRequestHandler();
 
 function withBasePath(url) {
+  if (!appBasePath) {
+    return url || "/";
+  }
+
   if (!url) {
     return appBasePath;
   }
