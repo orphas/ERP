@@ -5,7 +5,7 @@ Verpex cPanel Node.js deployment
 SSH into Verpex and run:
 
 ```bash
-cd /home/aofksaco/repositories/sgicerp && git pull && unset npm_config_prefix NPM_CONFIG_PREFIX && npm config delete prefix && rm -rf node_modules package-lock.json && npm install --include=dev --prefix /home/aofksaco/repositories/sgicerp && node /home/aofksaco/repositories/sgicerp/scripts/prisma-generate.cjs && /home/aofksaco/repositories/sgicerp/node_modules/.bin/next build --experimental-build-mode compile && /home/aofksaco/repositories/sgicerp/node_modules/.bin/next build --experimental-build-mode generate-env && mkdir -p tmp && touch tmp/restart.txt
+cd /home/aofksaco/repositories/sgicerp && git pull && unset npm_config_prefix NPM_CONFIG_PREFIX && npm config delete prefix && rm -rf node_modules package-lock.json && npm install --include=dev --prefix /home/aofksaco/repositories/sgicerp && node /home/aofksaco/repositories/sgicerp/scripts/prisma-generate.cjs && /home/aofksaco/repositories/sgicerp/node_modules/.bin/next build --experimental-build-mode compile && /home/aofksaco/repositories/sgicerp/node_modules/.bin/next build --experimental-build-mode generate-env && cloudlinux-selector restart --json --interpreter nodejs --user aofksaco --app-root repositories/sgicerp
 ```
 
 ## First-time setup only
