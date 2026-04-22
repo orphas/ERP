@@ -1,0 +1,9 @@
+- Next.js 15 dynamic route handlers expect params as Promise<{ id: string }> in route context.
+- In this workspace PowerShell may not support Get-Content -Raw, prefer [System.IO.File]::ReadAllText for bulk edits.
+- For PowerShell Invoke-WebRequest in this environment, add -UseBasicParsing to avoid script execution prompts.
+- If localhost:3000 shows inconsistent routes (for example / works but /login is 404), restart stale Next dev process chain and clear .next if needed.
+- If rg is unavailable in terminal, use Get-ChildItem + Select-String for workspace-wide href/path audits.
+- Use lib/useAuthz.ts in client pages to gate create/update/delete buttons with can(path, method) matching backend RBAC.
+- PDF printing is implemented via app/api/print/[document]/[id]/route.ts using Puppeteer in Node runtime, with SGICR branding from CompanySettings.
+- CompanySettings now stores pdfLetterheadUrl, pdfHeaderSpaceMm, and pdfFooterSpaceMm for global document layout control.
+- Playwright role smoke test command: npm run test:e2e:role (tests/e2e/role-matrix.spec.ts).

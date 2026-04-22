@@ -1,0 +1,533 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============ INVENTORY MODULE ============
+
+model Category {
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
+  description String?
+  products  Product[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UnitOfMeasure {
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
+  code      String  @unique
+  products  Product[]
+  createdAt DateTime @default(now())
+}
+
+model Warehouse {
+  id        Int     @id @default(autoincrement())
+  name      String
+  code      String  @unique
+  zoneType  String  @default("main") // main, transit, storage, returns, staging
+  address   String?
+  isActive  Boolean @default(true)
+  batches   Batch[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id                Int     @id @default(autoincrement())
+  name              String
+  description       String?
+  categoryId        Int
+  category          Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  price             Decimal
+  cost              Decimal @default(0)
+  sku               String  @unique
+  unitId            Int?
+  unit              UnitOfMeasure? @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  minStockThreshold Int     @default(10)
+  isActive          Boolean @default(true)
+  batches           Batch[]
+  invoiceBatchUsages InvoiceBatchUsage[]
+  quoteItems        QuoteItem[]
+  orderItems        SalesOrderItem[]
+  invoiceItems      InvoiceItem[]
+  poItems           PurchaseOrderItem[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Batch {
+  id                 Int     @id @default(autoincrement())
+  productId          Int
+  product            Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouseId        Int
+  warehouse          Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  batchNumber        String
+  quantity           Int
+  availableQuantity  Int
+  landedUnitCost     Decimal
+  expiryDate         DateTime?
+  invoiceBatchUsages InvoiceBatchUsage[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([productId, warehouseId, batchNumber])
+}
+
+// ============ CLIENTS MODULE ============
+
+model Customer {
+  id                    Int     @id @default(autoincrement())
+  name                  String
+  email                 String?
+  phone                 String?
+  address               String?
+  deliveryAddress       String?
+  ice                   String? // Identifiant Commun de l'Entreprise
+  ifCode                String? // Identifiant Fiscal
+  rc                    String? // Registre de Commerce
+  cnss                  String?
+  patente               String?
+  pricingTier           String  @default("standard") // standard, silver, gold, platinum
+  creditLimit           Decimal @default(0)
+  defaultCreditTermDays Int     @default(30)
+  isActive              Boolean @default(true)
+  quotes                Quote[]
+  salesOrders           SalesOrder[]
+  invoices              Invoice[]
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+// ============ SALES MODULE ============
+
+model Quote {
+  id          Int       @id @default(autoincrement())
+  customerId  Int
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  reference   String    @unique
+  date        DateTime  @default(now())
+  validityDays Int      @default(30)
+  status      String    @default("draft") // draft, sent, accepted, rejected, expired
+  subtotal    Decimal   @default(0)
+  vatRate     Decimal   @default(20)
+  vatAmount   Decimal   @default(0)
+  total       Decimal   @default(0)
+  notes       String?
+  createdById Int?
+  salesOrders SalesOrder[]
+  items       QuoteItem[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model QuoteItem {
+  id        Int     @id @default(autoincrement())
+  quoteId   Int
+  quote     Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Decimal
+  lineTotal Decimal
+  createdAt DateTime @default(now())
+}
+
+model SalesOrder {
+  id          Int       @id @default(autoincrement())
+  customerId  Int
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  quoteId     Int?
+  quote       Quote?    @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  reference   String    @unique
+  date        DateTime  @default(now())
+  status      String    @default("pending") // pending, confirmed, shipped, delivered, cancelled
+  subtotal    Decimal   @default(0)
+  vatRate     Decimal   @default(20)
+  vatAmount   Decimal   @default(0)
+  total       Decimal   @default(0)
+  creditTermDays Int    @default(30)
+  dueDate     DateTime?
+  items       SalesOrderItem[]
+  deliveries  Delivery[]
+  invoices    Invoice[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model SalesOrderItem {
+  id        Int        @id @default(autoincrement())
+  orderId   Int
+  order     SalesOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product    @relation(fields: [productId], references: [id])
+  quantity  Int
+  deliveredQty Int    @default(0)
+  unitPrice Decimal
+  lineTotal Decimal
+  createdAt DateTime   @default(now())
+}
+
+model Delivery {
+  id          Int        @id @default(autoincrement())
+  orderId     Int?
+  order       SalesOrder? @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  invoiceId   Int?
+  invoice     Invoice?    @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  reference   String     @unique
+  date        DateTime   @default(now())
+  waybill     String?
+  carrier     String?
+  status      String     @default("pending") // pending, partial, delivered
+  items       DeliveryItem[]
+  expenses    DeliveryExpense[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model DeliveryItem {
+  id         Int      @id @default(autoincrement())
+  deliveryId Int
+  delivery   Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  orderId    Int
+  quantity   Int
+  createdAt  DateTime @default(now())
+}
+
+model DeliveryExpense {
+  id          Int      @id @default(autoincrement())
+  deliveryId  Int
+  delivery    Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  description String
+  amount      Decimal
+  supplierId  Int?
+  supplier    Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+}
+
+model InvoiceBatchUsage {
+  id            Int        @id @default(autoincrement())
+  invoiceId     Int
+  invoice       Invoice    @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoiceItemId Int
+  invoiceItem   InvoiceItem @relation(fields: [invoiceItemId], references: [id], onDelete: Cascade)
+  productId     Int
+  product       Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  batchId       Int
+  batch         Batch      @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  quantity      Int
+  unitCost      Decimal
+  totalCost     Decimal
+  createdAt     DateTime   @default(now())
+
+  @@index([invoiceId])
+  @@index([batchId])
+  @@index([productId])
+}
+
+model Invoice {
+  id          Int        @id @default(autoincrement())
+  customerId  Int
+  customer    Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  orderId     Int?
+  order       SalesOrder? @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  reference   String     @unique
+  date        DateTime   @default(now())
+  status      String     @default("draft") // draft, sent, paid, overdue, cancelled
+  subtotal    Decimal @default(0)
+  vatRate     Decimal @default(20)
+  vatAmount   Decimal @default(0)
+  total       Decimal @default(0)
+  dueDate     DateTime?
+  paidDate    DateTime?
+  paidAmount  Decimal   @default(0)
+  items       InvoiceItem[]
+  deliveries  Delivery[]
+  batchUsages InvoiceBatchUsage[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model InvoiceItem {
+  id        Int     @id @default(autoincrement())
+  invoiceId Int
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  itemType  String  @default("product") // product, charge
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id])
+  description String?
+  quantity  Int
+  unitPrice Decimal
+  lineTotal Decimal
+  cogsAmount Decimal @default(0)
+  batchUsages InvoiceBatchUsage[]
+  createdAt DateTime @default(now())
+}
+
+// ============ FINANCE MODULE ============
+
+model Account {
+  id              Int     @id @default(autoincrement())
+  code            String  @unique
+  name            String
+  nameFr          String?
+  type            String  // asset, liability, equity, income, expense
+  accountClass    String? // 1-7 for Moroccan plan comptable
+  parentId        Int?
+  parent          Account? @relation("ParentChild", fields: [parentId], references: [id], onDelete: SetNull)
+  children        Account[] @relation("ParentChild")
+  balance         Decimal @default(0)
+  isActive        Boolean  @default(true)
+  description     String?
+  journalLines    JournalLine[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([code])
+}
+
+model JournalEntry {
+  id          Int     @id @default(autoincrement())
+  reference   String  @unique
+  date        DateTime @default(now())
+  journalType String  @default("general") // general, sales, purchases, bank, cash, payroll, misc
+  description String?
+  isPosted    Boolean @default(false)
+  createdById Int?
+  lines       JournalLine[]
+  createdAt   DateTime @default(now())
+
+  @@index([date])
+  @@index([isPosted])
+}
+
+model JournalLine {
+  id            Int          @id @default(autoincrement())
+  entryId       Int
+  entry         JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  accountId     Int
+  account       Account      @relation(fields: [accountId], references: [id])
+  type          String       // debit, credit
+  amount        Decimal
+  description   String?
+  createdAt     DateTime     @default(now())
+}
+
+// ============ PROCUREMENT MODULE ============
+
+model Supplier {
+  id        Int     @id @default(autoincrement())
+  name      String
+  defaultCurrency String @default("MAD") // MAD, USD, EUR...
+  email     String?
+  phone     String?
+  address   String?
+  ice       String?
+  ifCode    String?
+  rc        String?
+  isActive  Boolean @default(true)
+  orders    PurchaseOrder[]
+  expenseLines PurchaseOrderExpense[]
+  deliveryExpenses DeliveryExpense[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PurchaseOrder {
+  id          Int     @id @default(autoincrement())
+  supplierId  Int
+  supplier    Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  currency    String   @default("MAD")
+  reference   String  @unique
+  date        DateTime @default(now())
+  purchaseType String @default("local") // local, import
+  incoterm    String?
+  originCountry String?
+  expectedPort String?
+  customsReference String?
+  exchangeRate Decimal?
+  status      String  @default("draft") // draft, sent, confirmed, received, cancelled
+  subtotal    Decimal @default(0)
+  productSubtotal Decimal @default(0)
+  expenseSubtotal Decimal @default(0)
+  expenseVatAmount Decimal @default(0)
+  vatRate     Decimal @default(20)
+  vatAmount   Decimal @default(0)
+  total       Decimal @default(0)
+  paidAmount  Decimal @default(0)
+  paidDate    DateTime?
+  items       PurchaseOrderItem[]
+  expenses    PurchaseOrderExpense[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PurchaseOrderExpense {
+  id          Int           @id @default(autoincrement())
+  orderId     Int
+  order       PurchaseOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  supplierId  Int
+  supplier    Supplier      @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  description String
+  externalRef String?       // Invoice or reference number from the expense supplier
+  amount      Decimal
+  vatRate     Decimal @default(0)
+  vatAmount   Decimal @default(0)
+  total       Decimal @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model PurchaseOrderItem {
+  id        Int            @id @default(autoincrement())
+  orderId   Int
+  order     PurchaseOrder  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemType  String         @default("product") // product, charge
+  productId Int?
+  product   Product?       @relation(fields: [productId], references: [id])
+  description String?
+  quantity  Int
+  receivedQty Int         @default(0)
+  unitPrice Decimal
+  lineTotal Decimal
+  createdAt DateTime       @default(now())
+}
+
+// ============ HR MODULE ============
+
+model Employee {
+  id                Int     @id @default(autoincrement())
+  firstName         String
+  lastName          String
+  email             String  @unique
+  phone             String?
+  address           String?
+  hireDate          DateTime
+  position          String?
+  department        String?
+  salary            Decimal
+  ice               String?
+  cnss              String?
+  cin               String?
+  dateOfBirth       DateTime?
+  isActive          Boolean @default(true)
+  payrolls          Payroll[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Payroll {
+  id          Int      @id @default(autoincrement())
+  employeeId  Int
+  employee    Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  reference   String?  @unique
+  month       DateTime
+  baseSalary  Decimal @default(0)
+  bonuses     Decimal @default(0)
+  deductions  Decimal @default(0)
+  netPay      Decimal @default(0)
+  status      String   @default("draft") // draft, approved, paid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([employeeId, month])
+}
+
+// ============ SETTINGS MODULE ============
+
+model CompanySettings {
+  id              Int     @id @default(autoincrement())
+  companyName     String
+  companyEmail    String?
+  companyPhone    String?
+  address         String?
+  ice             String?
+  ifCode          String?
+  rc              String?
+  cnss            String?
+  patente         String?
+  vatRate         Decimal @default(20)
+  currency        String  @default("MAD")
+  language        String  @default("en")
+  logoUrl         String?
+  pdfLetterheadUrl String?
+  pdfSignatureUrl String?
+  pdfStampUrl     String?
+  pdfHeaderSpacePx Int     @default(72)
+  pdfFooterSpacePx Int     @default(56)
+  printFooterEn   String?  @default("Generated by ERP SGICR")
+  printFooterFr   String?  @default("Genere par ERP SGICR")
+  printTermsEn    String?
+  printTermsFr    String?
+  showSignatureOnPrint Boolean @default(true)
+  showStampOnPrint Boolean @default(true)
+  quoteTemplateUrl String?
+  orderTemplateUrl String?
+  invoiceTemplateUrl String?
+  deliveryTemplateUrl String?
+  purchaseOrderTemplateUrl String?
+  payrollTemplateUrl String?
+  journalTemplateUrl String?
+  quoteNumberPrefix String @default("QT")
+  orderNumberPrefix String @default("SO")
+  invoiceNumberPrefix String @default("INV")
+  deliveryNumberPrefix String @default("DL")
+  purchaseOrderNumberPrefix String @default("PO")
+  journalNumberPrefix String @default("JE")
+  payrollNumberPrefix String @default("PAY")
+  quoteSequence Int @default(1)
+  orderSequence Int @default(1)
+  invoiceSequence Int @default(1)
+  deliverySequence Int @default(1)
+  purchaseOrderSequence Int @default(1)
+  journalSequence Int @default(1)
+  payrollSequence Int @default(1)
+  fiscalYearStart Int     @default(1) // 1 = January
+  updatedAt       DateTime @updatedAt
+}
+
+model PeriodClose {
+  id               Int      @id @default(autoincrement())
+  month            DateTime @unique
+  financeClosed    Boolean  @default(false)
+  inventoryClosed  Boolean  @default(false)
+  hrClosed         Boolean  @default(false)
+  salesClosed      Boolean  @default(false)
+  procurementClosed Boolean @default(false)
+  notes            String?
+  closedByRole     String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// ============ OPERATIONS MODULE ============
+
+model OperationsLog {
+  id        Int     @id @default(autoincrement())
+  action    String
+  entityType String
+  entityId  Int?
+  details   String?
+  userId    Int?
+  createdAt DateTime @default(now())
+}
+
+model ReportSnapshot {
+  id          Int      @id @default(autoincrement())
+  type        String
+  periodStart DateTime
+  periodEnd   DateTime
+  payload     Json
+  createdAt   DateTime @default(now())
+
+  @@index([type, periodStart])
+  @@unique([type, periodStart, periodEnd])
+}

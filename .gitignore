@@ -1,0 +1,69 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Next.js
+.next/
+out/
+build/
+
+# Environment
+.env.local
+.env.*.local
+*.pem
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python (old Django project)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+.venv
+
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+
+# Prisma
+*.db
+*.db-journal
+
+# Build
+dist/
+
+# Extra env and generated files
+.env
+.next-dev/
+test-results/
+playwright-report/
+*.tsbuildinfo
+
+# Deployment archives and temp files
+*.zip
+*.tar.gz
+.tmp/
