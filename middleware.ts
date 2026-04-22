@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth";
-import { stripBasePath, withBasePath } from "@/lib/base-path";
+import { stripBasePath } from "@/lib/base-path";
 import { canAccessApi, canAccessPage } from "@/lib/rbac";
 
 const PUBLIC_PATHS = ["/login"];
@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
     }
 
     const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = withBasePath("/login");
+    loginUrl.pathname = "/login";
     loginUrl.search = "";
     loginUrl.searchParams.set("next", appPathname);
     const response = NextResponse.redirect(loginUrl);
@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
     }
   } else if (!canAccessPage(user.role, appPathname)) {
     const homeUrl = request.nextUrl.clone();
-    homeUrl.pathname = withBasePath("/");
+    homeUrl.pathname = "/";
     homeUrl.search = "";
     return NextResponse.redirect(homeUrl);
   }
