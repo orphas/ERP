@@ -63,10 +63,12 @@ export default function AccountsList() {
 
   const filteredAccounts = accounts.filter((account) => {
     const query = search.trim().toLowerCase();
+    const code = (account.code || "").toLowerCase();
+    const name = (account.name || "").toLowerCase();
     const matchesSearch =
       !query ||
-      account.code.toLowerCase().includes(query) ||
-      account.name.toLowerCase().includes(query);
+      code.includes(query) ||
+      name.includes(query);
     const matchesType = typeFilter === "all" || account.type === typeFilter;
     const matchesStatus =
       statusFilter === "all" ||

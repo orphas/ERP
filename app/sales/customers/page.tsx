@@ -7,8 +7,8 @@ import { useAuthz } from "@/lib/useAuthz";
 interface Customer {
   id: number;
   name: string;
-  email: string;
-  phone: string;
+  email: string | null;
+  phone: string | null;
   isActive: boolean;
 }
 
@@ -51,11 +51,14 @@ export default function CustomersList() {
 
   const filteredCustomers = customers.filter((customer) => {
     const query = search.trim().toLowerCase();
+    const name = customer.name.toLowerCase();
+    const email = (customer.email || "").toLowerCase();
+    const phone = (customer.phone || "").toLowerCase();
     const matchesSearch =
       !query ||
-      customer.name.toLowerCase().includes(query) ||
-      customer.email.toLowerCase().includes(query) ||
-      customer.phone.toLowerCase().includes(query);
+      name.includes(query) ||
+      email.includes(query) ||
+      phone.includes(query);
     const matchesStatus =
       statusFilter === "all" ||
       (statusFilter === "active" ? customer.isActive : !customer.isActive);

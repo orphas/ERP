@@ -8,9 +8,9 @@ interface Employee {
   id: number;
   firstName: string;
   lastName: string;
-  email: string;
-  position: string;
-  department: string;
+  email: string | null;
+  position: string | null;
+  department: string | null;
   salary: string;
   isActive: boolean;
 }
@@ -57,12 +57,14 @@ export default function EmployeesList() {
 
   const filteredEmployees = employees.filter((emp) => {
     const query = search.trim().toLowerCase();
-    const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+    const fullName = `${emp.firstName || ""} ${emp.lastName || ""}`.trim().toLowerCase();
+    const email = (emp.email || "").toLowerCase();
+    const position = (emp.position || "").toLowerCase();
     const matchesSearch =
       !query ||
       fullName.includes(query) ||
-      emp.email.toLowerCase().includes(query) ||
-      (emp.position || "").toLowerCase().includes(query);
+      email.includes(query) ||
+      position.includes(query);
     const matchesDepartment =
       departmentFilter === "all" || (emp.department || "") === departmentFilter;
     const matchesStatus =

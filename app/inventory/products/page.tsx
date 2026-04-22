@@ -59,10 +59,12 @@ export default function ProductsList() {
   const filteredProducts = products
     .filter((product) => {
       const query = search.trim().toLowerCase();
+      const name = (product.name || "").toLowerCase();
+      const sku = (product.sku || "").toLowerCase();
       const matchesSearch =
         !query ||
-        product.name.toLowerCase().includes(query) ||
-        product.sku.toLowerCase().includes(query);
+        name.includes(query) ||
+        sku.includes(query);
       const matchesCategory =
         categoryFilter === "all" || (product.category?.name || "") === categoryFilter;
       return matchesSearch && matchesCategory;
@@ -70,8 +72,8 @@ export default function ProductsList() {
     .sort((a, b) => {
       if (sortBy === "price_desc") return Number(b.price) - Number(a.price);
       if (sortBy === "price_asc") return Number(a.price) - Number(b.price);
-      if (sortBy === "sku") return a.sku.localeCompare(b.sku);
-      return a.name.localeCompare(b.name);
+      if (sortBy === "sku") return (a.sku || "").localeCompare(b.sku || "");
+      return (a.name || "").localeCompare(b.name || "");
     });
 
   const totalValue = filteredProducts.reduce((sum, p) => sum + Number(p.price || 0), 0);

@@ -7,8 +7,8 @@ import { useAuthz } from "@/lib/useAuthz";
 interface Supplier {
   id: number;
   name: string;
-  email: string;
-  phone: string;
+  email: string | null;
+  phone: string | null;
   defaultCurrency: string;
   isActive: boolean;
 }
@@ -52,11 +52,14 @@ export default function SuppliersList() {
 
   const filteredSuppliers = suppliers.filter((supplier) => {
     const query = search.trim().toLowerCase();
+    const name = supplier.name.toLowerCase();
+    const email = (supplier.email || "").toLowerCase();
+    const phone = (supplier.phone || "").toLowerCase();
     const matchesSearch =
       !query ||
-      supplier.name.toLowerCase().includes(query) ||
-      supplier.email.toLowerCase().includes(query) ||
-      supplier.phone.toLowerCase().includes(query);
+      name.includes(query) ||
+      email.includes(query) ||
+      phone.includes(query);
     const matchesStatus =
       statusFilter === "all" || (statusFilter === "active" ? supplier.isActive : !supplier.isActive);
     return matchesSearch && matchesStatus;
