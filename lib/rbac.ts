@@ -5,7 +5,9 @@ function isReadMethod(method: string): boolean {
 }
 
 export function canAccessPage(role: Role, pathname: string): boolean {
+  if (role === "admin") return true;
   if (pathname === "/") return true;
+  if (pathname.startsWith("/settings/users")) return false;
   if (pathname.startsWith("/inventory")) return true;
   if (pathname.startsWith("/sales")) return true;
   if (pathname.startsWith("/procurement")) return true;
@@ -34,6 +36,10 @@ export function canAccessApi(role: Role, pathname: string, method: string): bool
   if (role === "admin") return true;
 
   const readOnly = isReadMethod(method);
+
+  if (pathname.startsWith("/api/settings/users")) {
+    return false;
+  }
 
   if (pathname.startsWith("/api/settings")) {
     if (role === "manager") {

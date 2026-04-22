@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSessionToken, SESSION_COOKIE, validateCredentials } from "@/lib/auth";
+import { createSessionToken, SESSION_COOKIE } from "@/lib/auth";
+import { authenticateUser } from "@/lib/user-store";
+
+export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
     const { username, password } = await request.json();
-    const user = validateCredentials(String(username || ""), String(password || ""));
+    const user = await authenticateUser(String(username || ""), String(password || ""));
 
     if (!user) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });

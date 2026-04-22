@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import NavOrderSection from "./NavOrderSection";
 
@@ -273,6 +274,32 @@ export default function SettingsPage() {
             <p className="page-subtitle">
               Configure company profile, fiscal defaults, and compliance identifiers.
             </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-2">
+        <div className="card space-y-3">
+          <h2 className="text-lg font-semibold text-white">Access Control</h2>
+          <p className="text-sm text-slate-400">
+            Manage admin, manager, and staff accounts from the dedicated user access panel.
+          </p>
+          <div>
+            <Link href="/settings/users" className="btn-primary btn-sm">
+              Open User Access
+            </Link>
+          </div>
+        </div>
+
+        <div className="card space-y-3">
+          <h2 className="text-lg font-semibold text-white">Data Tools</h2>
+          <p className="text-sm text-slate-400">
+            Import and export core master data through the Excel data exchange workspace.
+          </p>
+          <div>
+            <Link href="/settings/data-exchange" className="btn-secondary btn-sm">
+              Open Data Exchange
+            </Link>
           </div>
         </div>
       </section>

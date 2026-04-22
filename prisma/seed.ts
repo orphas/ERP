@@ -1,6 +1,13 @@
 import { PrismaClient } from "@prisma/client";
+import { randomBytes, scryptSync } from "node:crypto";
 
 const prisma = new PrismaClient();
+
+function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  const derivedKey = scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${derivedKey}`;
+}
 
 async function seed() {
   console.log("🌱 Starting seed...");
@@ -295,6 +302,35 @@ async function seed() {
     });
 
     console.log("✓ Created accounts");
+
+    await prisma.appUser.createMany({
+      data: [
+        {
+          username: "admin",
+          passwordHash: hashPassword("admin123"),
+          name: "System Admin",
+          role: "admin",
+          isActive: true,
+        },
+        {
+          username: "manager",
+          passwordHash: hashPassword("manager123"),
+          name: "Operations Manager",
+          role: "manager",
+          isActive: true,
+        },
+        {
+          username: "staff",
+          passwordHash: hashPassword("staff123"),
+          name: "ERP Staff",
+          role: "staff",
+          isActive: true,
+        },
+      ],
+      skipDuplicates: true,
+    });
+
+    console.log("✓ Created application users");
 
     console.log("✅ Seed completed successfully!");
   } catch (error) {

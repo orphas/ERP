@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
 
-export type Role = "admin" | "manager" | "staff";
+export const ROLE_VALUES = ["admin", "manager", "staff"] as const;
+
+export type Role = (typeof ROLE_VALUES)[number];
 
 export interface SessionUser {
   username: string;
@@ -11,12 +13,6 @@ export interface SessionUser {
 
 const DEFAULT_SECRET = "erp_sgicr_dev_secret_change_me";
 export const SESSION_COOKIE = "erp_session";
-
-const USERS = [
-  { username: "admin", password: "admin123", name: "System Admin", role: "admin" as const },
-  { username: "manager", password: "manager123", name: "Operations Manager", role: "manager" as const },
-  { username: "staff", password: "staff123", name: "ERP Staff", role: "staff" as const },
-];
 
 function getSecret(): string {
   return process.env.AUTH_SECRET || DEFAULT_SECRET;
@@ -60,10 +56,6 @@ async function getHmacKey(): Promise<CryptoKey> {
     false,
     ["sign", "verify"]
   );
-}
-
-export function validateCredentials(username: string, password: string) {
-  return USERS.find((u) => u.username === username && u.password === password) || null;
 }
 
 export async function createSessionToken(user: { username: string; name: string; role: Role }): Promise<string> {
@@ -111,7 +103,7 @@ export async function verifySessionToken(token: string | undefined): Promise<Ses
     if (!payload.exp || payload.exp < Math.floor(Date.now() / 1000)) {
       return null;
     }
-    if (!["admin", "manager", "staff"].includes(payload.role)) {
+    if (!ROLE_VALUES.includes(payload.role)) {
       return null;
     }
     return payload;

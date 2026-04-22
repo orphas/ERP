@@ -7,8 +7,8 @@ export default function LoginPage() {
   const router = useRouter();
   const [nextPath, setNextPath] = useState("/");
 
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("admin123");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -93,7 +93,7 @@ export default function LoginPage() {
             <div>
               <p className="hero-kicker">Secure access</p>
               <h2 className="mt-2 text-3xl font-semibold text-white">Sign in</h2>
-              <p className="page-subtitle">Use one of the demo roles to check permissions and workflows.</p>
+              <p className="page-subtitle">Use an active account created by your system administrator.</p>
             </div>
 
             {error && <div className="alert-error mt-4">{error}</div>}
@@ -124,24 +124,6 @@ export default function LoginPage() {
                 {loading ? "Signing in..." : "Enter ERP workspace"}
               </button>
             </form>
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              <button type="button" className="metric-card text-left" onClick={() => { setUsername("admin"); setPassword("admin123"); }}>
-                <div className="stat-label">Admin</div>
-                <div className="text-base font-semibold text-white">admin</div>
-                <div className="metric-note">Full settings and control access.</div>
-              </button>
-              <button type="button" className="metric-card text-left" onClick={() => { setUsername("manager"); setPassword("manager123"); }}>
-                <div className="stat-label">Manager</div>
-                <div className="text-base font-semibold text-white">manager</div>
-                <div className="metric-note">Operational supervision and approvals.</div>
-              </button>
-              <button type="button" className="metric-card text-left" onClick={() => { setUsername("staff"); setPassword("staff123"); }}>
-                <div className="stat-label">Staff</div>
-                <div className="text-base font-semibold text-white">staff</div>
-                <div className="metric-note">Daily processing without admin control.</div>
-              </button>
-            </div>
           </div>
         </section>
       </div>
