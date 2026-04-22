@@ -1,6 +1,6 @@
 Verpex cPanel Node.js deployment
 
-Target domain: `https://sgicerp.sgicr.com`
+Target domain: `https://sgicrerp.sgicr.com`
 
 ## One-command deploy (run this every time you push code)
 
@@ -29,7 +29,7 @@ cd /home/aofksaco/repositories/sgicerp && git pull && unset npm_config_prefix NP
 cd /home/aofksaco/repositories/sgicerp && node /home/aofksaco/repositories/sgicerp/scripts/prisma-db-push.cjs
 ```
 
-Then log in at `https://sgicerp.sgicr.com/login` with `admin / admin123` and go to Settings → User Access to create real users.
+Then log in at `https://sgicrerp.sgicr.com/login` with `admin / admin123` and go to Settings → User Access to create real users.
 
 ## Why this works
 
@@ -43,6 +43,6 @@ Then log in at `https://sgicerp.sgicr.com/login` with `admin / admin123` and go 
 
 - Never edit files directly on the server — always push via git and redeploy
 - SQLite DB is at `prisma/dev.db` — do not delete it
-- For the subdomain deployment, keep `APP_BASE_PATH=""` and use `https://sgicerp.sgicr.com`
+- For the subdomain deployment, keep `APP_BASE_PATH=""` and use `https://sgicrerp.sgicr.com`
 - If you later deploy under a URL path (example `/sgicerp`), set `APP_BASE_PATH="/sgicerp"`
 - Do not upload `.venv`, `node_modules`, `.next-dev`
