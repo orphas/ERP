@@ -16,10 +16,14 @@ if (!existsSync(prismaCliPath)) {
   process.exit(1);
 }
 
-const result = spawnSync(process.execPath, [prismaCliPath, "db", "push", `--schema=${schemaPath}`], {
+const result = spawnSync(
+  process.execPath,
+  [prismaCliPath, "db", "push", `--schema=${schemaPath}`, "--accept-data-loss"],
+  {
   cwd: projectRoot,
   stdio: "inherit",
   env: process.env,
-});
+  }
+);
 
 process.exit(result.status ?? 1);
